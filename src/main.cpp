@@ -13,7 +13,7 @@
 // http://forum.arduino.cc/index.php?topic=139958.0
 
 // system status lib wraps up VRef usage.  Cool
-
+#define LED_ACTIVE
 #define PIN_LED 4
 // skipcount is number of sleep periods to skip before actually flashing the LED
 #define LED_SKIPCOUNT 4
@@ -61,7 +61,7 @@ void setup()
   pinMode(ANALOG_IN, INPUT);
 
 #ifdef LED_ACTIVE
-  pinMode(PIN_LED, output);
+  pinMode(PIN_LED, OUTPUT);
 #endif
 }
 
@@ -87,16 +87,16 @@ void loop()
   static uint8_t skip = LED_SKIPCOUNT;
   if(skip-- == 0)
   {
-    digitalWrite(pinLed,HIGH);  // let led blink
+    digitalWrite(PIN_LED,HIGH);  // let led blink
     delay(30);
     skip = LED_SKIPCOUNT;
-    digitalWrite(pinLed,LOW);
+    digitalWrite(PIN_LED,LOW);
   }
 
-  pinMode(pinLed,INPUT); // set all used port to intput to save power
+  pinMode(PIN_LED,INPUT); // set all used port to intput to save power
 #endif
   system_sleep();
 #ifdef LED_ACTIVE
-  pinMode(pinLed,OUTPUT); // resume
+  pinMode(PIN_LED,OUTPUT); // resume
 #endif
 }

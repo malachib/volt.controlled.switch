@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Adafruit_SleepyDog.h>
+#include <SystemStatus.h>
 
 #include <avr/sleep.h>
 #include <avr/wdt.h>
@@ -7,7 +8,18 @@
 // using code cues from https://arduinoelectronics.wordpress.com/2014/01/06/ultra-low-power-led-flasher-with-attiny/
 // interesting info http://web.engr.oregonstate.edu/~traylor/ece473/lectures/reset.pdf
 
+// reference voltage stuff may be more convenient than tying up an ADC pin:
+// http://forum.arduino.cc/index.php?topic=223897.0
+// http://forum.arduino.cc/index.php?topic=139958.0
+
+// system status lib wraps up VRef usage.  Cool
+
 #define PIN_LED 4
+// skipcount is number of sleep periods to skip before actually flashing the LED
+#define LED_SKIPCOUNT 4
+
+// doesn't use A0, A1, etc. like Uno and friends
+#define ANALOG_IN 1
 
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -15,6 +27,21 @@
 #ifndef sbi
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
+
+
+// voltage (millivolts)
+#define THRESHOLD_VOLTAGE 13000
+// dial in operating voltage exactly right , I plan to undervolt this sucker
+//#define OPERATING_VOLTAGE 4.5
+
+// what fixed dividers we've got out there to bring us within to operating
+// voltage range (attiny I expect around 2.5V-5.5V)
+#define VOLTAGE_DIVIDER 3.5
+
+#define DIVIDED_THRESHOLD_VOLTAGE (THRESHOLD_VOLTAGE / VOLTAGE_DIVIDER)
+
+
+#define ADC_INPUT_THRESHOLD
 
 void setup()
 {
@@ -30,7 +57,10 @@ void setup()
 
   Watchdog.setup(bb);
 
-#ifdef DEBUG
+  // prep analog input to see what kind of voltage values are preset
+  pinMode(ANALOG_IN, INPUT);
+
+#ifdef LED_ACTIVE
   pinMode(PIN_LED, output);
 #endif
 }
@@ -53,15 +83,20 @@ void system_sleep()
 
 void loop()
 {
-#ifdef DEBUG
-  digitalWrite(pinLed,HIGH);  // let led blink
-  delay(30);
-  digitalWrite(pinLed,LOW);
+#ifdef LED_ACTIVE
+  static uint8_t skip = LED_SKIPCOUNT;
+  if(skip-- == 0)
+  {
+    digitalWrite(pinLed,HIGH);  // let led blink
+    delay(30);
+    skip = LED_SKIPCOUNT;
+    digitalWrite(pinLed,LOW);
+  }
 
   pinMode(pinLed,INPUT); // set all used port to intput to save power
 #endif
   system_sleep();
-#ifdef DEBUG
+#ifdef LED_ACTIVE
   pinMode(pinLed,OUTPUT); // resume
 #endif
 }

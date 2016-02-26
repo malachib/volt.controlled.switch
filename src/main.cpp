@@ -108,9 +108,9 @@ void loop()
 {
 #ifdef LED_ACTIVE
   static uint8_t skip = LED_SKIPCOUNT;
-  if(skip-- == 0)
+  if(--skip == 0)
   {
-    COUT_PRINTLN("blinking");
+    COUT_PRINTLN("pulse");
     digitalWrite(PIN_LED,HIGH);  // let led blink
     delay(30);
     skip = LED_SKIPCOUNT;

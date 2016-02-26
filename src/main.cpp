@@ -2,6 +2,22 @@
 #include <Adafruit_SleepyDog.h>
 #include <SystemStatus.h>
 
+#define DEBUG_SERIAL
+
+#ifdef DEBUG_SERIAL
+#include "SoftwareSerial.h"
+
+#define PIN_RX 3
+#define PIN_TX 4
+
+SoftwareSerial Serial(PIN_RX, PIN_TX);
+
+#define COUT_PRINTLN(s) Serial.println(F(s))
+#else
+#define COUT_PRINTLN(s) {}
+#endif
+
+
 #include <avr/sleep.h>
 #include <avr/wdt.h>
 
@@ -63,6 +79,13 @@ void setup()
 #ifdef LED_ACTIVE
   pinMode(PIN_LED, OUTPUT);
 #endif
+
+#ifdef DEBUG_SERIAL
+  pinMode(PIN_RX, INPUT);
+  pinMode(PIN_TX, OUTPUT);
+
+  Serial.begin(9600);
+#endif
 }
 
 
@@ -87,6 +110,7 @@ void loop()
   static uint8_t skip = LED_SKIPCOUNT;
   if(skip-- == 0)
   {
+    COUT_PRINTLN("blinking");
     digitalWrite(PIN_LED,HIGH);  // let led blink
     delay(30);
     skip = LED_SKIPCOUNT;

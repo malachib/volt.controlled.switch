@@ -27,9 +27,6 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 // TODO: have a capacitor onboard and power down voltage regulator since regulator quiescent
 // cuurent gonna be 150ua all the time whether we draw power or not
 
-#include <avr/sleep.h>
-#include <avr/wdt.h>
-
 // using code cues from https://arduinoelectronics.wordpress.com/2014/01/06/ultra-low-power-led-flasher-with-attiny/
 // interesting info http://web.engr.oregonstate.edu/~traylor/ece473/lectures/reset.pdf
 
@@ -44,7 +41,14 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 #define LED_SKIPCOUNT 4
 
 // doesn't use A0, A1, etc. like Uno and friends
-#define ANALOG_IN 1
+// car battery reference voltage input
+#define ANALOG_IN_VBAT 1
+// onboard capacitor reference voltage input
+#define ANALOG_IN_CAP 2
+
+// pin connected to switch we take high or low depending on
+// reference voltage threshold
+#define PIN_SWITCH 0
 
 // voltage (millivolts)
 #define THRESHOLD_VOLTAGE 13000
@@ -56,9 +60,6 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 #define VOLTAGE_DIVIDER 3.5
 
 #define DIVIDED_THRESHOLD_VOLTAGE (THRESHOLD_VOLTAGE / VOLTAGE_DIVIDER)
-
-
-#define ADC_INPUT_THRESHOLD
 
 void setup()
 {
@@ -75,7 +76,8 @@ void setup()
   Watchdog.setup(bb);
 
   // prep analog input to see what kind of voltage values are preset
-  pinMode(ANALOG_IN, INPUT);
+  pinMode(ANALOG_IN_VBAT, INPUT);
+  pinMode(PIN_SWITCH, OUTPUT);
 
 #ifdef LED_ACTIVE
   pinMode(PIN_LED, OUTPUT);
@@ -97,16 +99,29 @@ void dozeStateHandler()
     static uint8_t skip = LED_SKIPCOUNT;
     if(--skip == 0)
     {
-      COUT_PRINTLN("pulse");
       digitalWrite(PIN_LED,HIGH);  // let led blink
+  #ifndef DEBUG_SERIAL
       delay(30);
+  #else
+      COUT_PRINTLN("pulse");
+  #endif
       skip = LED_SKIPCOUNT;
       digitalWrite(PIN_LED,LOW);
     }
 
     pinMode(PIN_LED,INPUT); // set all used port to intput to save power
+    // Q: is that going to be an issue with the switch itself?
+    // will the switch be OK with a floating line? or might something
+    // externally change its state causing an unwanted on or off?
+    // can we
+    // properly sleep if we are holding the line to a certain state?
   #endif
+    pinMode(PIN_SWITCH, INPUT);
+    //pinMode(PIN_SWITCH, INPUT_PULLUP); // see how well this works , measure with voltmeter:
+    //  1. sleep mode power usage
+    //  2. whether input does stay in PULLUP mode while asleep
     system_sleep();
+    pinMode(PIN_SWITCH, OUTPUT);
   #ifdef LED_ACTIVE
     pinMode(PIN_LED,OUTPUT); // resume
   #endif
@@ -114,7 +129,7 @@ void dozeStateHandler()
 
 void loop()
 {
-  uint16_t vbat = analogRead(ANALOG_IN);
+  uint16_t vbat = analogRead(ANALOG_IN_VBAT);
 
   if(vbat < DIVIDED_THRESHOLD_VOLTAGE)
     belowThresholdStateHandler();

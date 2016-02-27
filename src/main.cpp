@@ -162,6 +162,9 @@ void dozeStateHandler()
 void loop()
 {
   uint16_t vbat = analogRead(ANALOG_IN_VBAT);
+  uint16_t vcap = analogRead(ANALOG_IN_CAP);
+
+  //capStateMachine.process();
 
   if(vbat < DIVIDED_THRESHOLD_VOLTAGE)
     belowThresholdStateHandler();

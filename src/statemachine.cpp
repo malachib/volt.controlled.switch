@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "states.h"
+#include "Console.h"
 
 State state;
 
@@ -44,4 +45,13 @@ void aboveThresholdStateHandler()
       lastAwakeTime = millis();
       break;
   }
+}
+
+CapStateMachine capStateMachine;
+
+void CapStateMachine::process(uint16_t vcap)
+{
+  auto state = getState();
+
+  cout << F("TEST: ") << state;
 }

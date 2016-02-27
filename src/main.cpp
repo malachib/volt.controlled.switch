@@ -9,6 +9,7 @@
 #ifdef DEBUG_SERIAL
 #include "SoftwareSerial.h"
 
+// TODO: move these to 0 and 1 since 3 and 4 tie up ADC channels
 #define PIN_RX 3
 #define PIN_TX 4
 
@@ -36,7 +37,6 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 
 // system status lib wraps up VRef usage.  Cool
 #define LED_ACTIVE
-#define PIN_LED 4
 // skipcount is number of sleep periods to skip before actually flashing the LED
 #define LED_SKIPCOUNT 4
 
@@ -46,9 +46,15 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 // onboard capacitor reference voltage input
 #define ANALOG_IN_CAP 2
 
+// where our status LED lives
+#define PIN_LED 4
 // pin connected to switch we take high or low depending on
 // reference voltage threshold
 #define PIN_SWITCH 0
+
+// pin connected to regulator enable
+#define PIN_REGULATOR 1
+
 
 // voltage (millivolts)
 #define THRESHOLD_VOLTAGE 13000
@@ -60,6 +66,38 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 #define VOLTAGE_DIVIDER 3.5
 
 #define DIVIDED_THRESHOLD_VOLTAGE (THRESHOLD_VOLTAGE / VOLTAGE_DIVIDER)
+
+// what minimum value to read out of ADC to continue with voltage regulator OFF
+#define DIVIDED_THRESHOLD_CAP_VOLTAGE 512
+
+void enableOutputPins()
+{
+  pinMode(PIN_SWITCH, OUTPUT);
+  pinMode(PIN_REGULATOR, OUTPUT);
+
+#ifdef LED_ACTIVE
+  pinMode(PIN_LED, OUTPUT);
+#endif
+
+#ifdef DEBUG_SERIAL
+  pinMode(PIN_TX, OUTPUT);
+#endif
+}
+
+
+void disableOutputPins()
+{
+  pinMode(PIN_SWITCH, INPUT);
+  pinMode(PIN_REGULATOR, INPUT);
+
+#ifdef LED_ACTIVE
+  pinMode(PIN_LED, INPUT);
+#endif
+
+#ifdef DEBUG_SERIAL
+  pinMode(PIN_TX, INPUT);
+#endif
+}
 
 void setup()
 {
@@ -77,11 +115,7 @@ void setup()
 
   // prep analog input to see what kind of voltage values are preset
   pinMode(ANALOG_IN_VBAT, INPUT);
-  pinMode(PIN_SWITCH, OUTPUT);
-
-#ifdef LED_ACTIVE
-  pinMode(PIN_LED, OUTPUT);
-#endif
+  pinMode(ANALOG_IN_CAP, INPUT);
 
 #ifdef DEBUG_SERIAL
   pinMode(PIN_RX, INPUT);
@@ -89,6 +123,8 @@ void setup()
 
   Serial.begin(9600);
 #endif
+
+  enableOutputPins();
 }
 
 void system_sleep();
@@ -109,22 +145,18 @@ void dozeStateHandler()
       digitalWrite(PIN_LED,LOW);
     }
 
-    pinMode(PIN_LED,INPUT); // set all used port to intput to save power
+  #endif
+    disableOutputPins();
     // Q: is that going to be an issue with the switch itself?
     // will the switch be OK with a floating line? or might something
     // externally change its state causing an unwanted on or off?
     // can we
     // properly sleep if we are holding the line to a certain state?
-  #endif
-    pinMode(PIN_SWITCH, INPUT);
     //pinMode(PIN_SWITCH, INPUT_PULLUP); // see how well this works , measure with voltmeter:
     //  1. sleep mode power usage
     //  2. whether input does stay in PULLUP mode while asleep
     system_sleep();
-    pinMode(PIN_SWITCH, OUTPUT);
-  #ifdef LED_ACTIVE
-    pinMode(PIN_LED,OUTPUT); // resume
-  #endif
+    enableOutputPins();
 }
 
 void loop()

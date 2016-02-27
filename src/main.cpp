@@ -2,6 +2,8 @@
 #include <Adafruit_SleepyDog.h>
 #include <SystemStatus.h>
 
+#include "states.h"
+
 #define DEBUG_SERIAL
 
 #ifdef DEBUG_SERIAL
@@ -17,6 +19,13 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 #define COUT_PRINTLN(s) {}
 #endif
 
+// attiny45 doing a similar job, but where's the source code?
+// http://austindavid.com/jm3/index.php/hardware/57-lvd-project
+
+// TODO: need simplistic Hysteresis so that we don't accidentally bounce
+// it up and down a bunch (surface charge/sleep mode lack of draw may bring it back.. ?)
+// TODO: have a capacitor onboard and power down voltage regulator since regulator quiescent
+// cuurent gonna be 150ua all the time whether we draw power or not
 
 #include <avr/sleep.h>
 #include <avr/wdt.h>
@@ -36,14 +45,6 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 
 // doesn't use A0, A1, etc. like Uno and friends
 #define ANALOG_IN 1
-
-#ifndef cbi
-#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
-#endif
-#ifndef sbi
-#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-#endif
-
 
 // voltage (millivolts)
 #define THRESHOLD_VOLTAGE 13000
@@ -88,39 +89,35 @@ void setup()
 #endif
 }
 
+void system_sleep();
 
-// set system into the sleep state
-// system wakes up when wtchdog is timed out
-void system_sleep()
+void dozeStateHandler()
 {
-  cbi(ADCSRA,ADEN);                    // switch Analog to Digitalconverter OFF
+  #ifdef LED_ACTIVE
+    static uint8_t skip = LED_SKIPCOUNT;
+    if(--skip == 0)
+    {
+      COUT_PRINTLN("pulse");
+      digitalWrite(PIN_LED,HIGH);  // let led blink
+      delay(30);
+      skip = LED_SKIPCOUNT;
+      digitalWrite(PIN_LED,LOW);
+    }
 
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
-  sleep_enable();
-
-  sleep_mode();                        // System sleeps here
-
-  sleep_disable();                     // System continues execution here when watchdog timed out
-  sbi(ADCSRA,ADEN);                    // switch Analog to Digitalconverter ON
+    pinMode(PIN_LED,INPUT); // set all used port to intput to save power
+  #endif
+    system_sleep();
+  #ifdef LED_ACTIVE
+    pinMode(PIN_LED,OUTPUT); // resume
+  #endif
 }
 
 void loop()
 {
-#ifdef LED_ACTIVE
-  static uint8_t skip = LED_SKIPCOUNT;
-  if(--skip == 0)
-  {
-    COUT_PRINTLN("pulse");
-    digitalWrite(PIN_LED,HIGH);  // let led blink
-    delay(30);
-    skip = LED_SKIPCOUNT;
-    digitalWrite(PIN_LED,LOW);
-  }
+  uint16_t vbat = analogRead(ANALOG_IN);
 
-  pinMode(PIN_LED,INPUT); // set all used port to intput to save power
-#endif
-  system_sleep();
-#ifdef LED_ACTIVE
-  pinMode(PIN_LED,OUTPUT); // resume
-#endif
+  if(vbat < DIVIDED_THRESHOLD_VOLTAGE)
+    belowThresholdStateHandler();
+  else
+    aboveThresholdStateHandler();
 }

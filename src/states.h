@@ -22,6 +22,10 @@ void dozeStateHandler();
 void belowThresholdStateHandler();
 void aboveThresholdStateHandler(uint16_t vbat);
 
+//void ledWaking();
+//void ledSleep();
+//void ledDoze();
+
 class CapStateMachine : public StateMachineStatic<CapState>
 {
 public:

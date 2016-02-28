@@ -65,6 +65,8 @@ void enableOutputPins()
 
 #ifdef DEBUG_SERIAL
   pinMode(PIN_TX, OUTPUT);
+
+  Serial.begin(9600);
 #endif
 }
 
@@ -81,6 +83,8 @@ void disableOutputPins()
 #endif
 
 #ifdef DEBUG_SERIAL
+  Serial.end();
+
   pinMode(PIN_TX, INPUT);
 #endif
 }
@@ -88,7 +92,7 @@ void disableOutputPins()
 void setup()
 {
   // For debug only, give us time to connect serial debugger
-  delay(5000);
+  //delay(5000);
 
   // 0=16ms, 1=32ms,2=64ms,3=128ms,4=250ms,5=500ms
   // 6=1 sec,7=2 sec, 8=4 sec, 9= 8sec
@@ -110,9 +114,9 @@ void setup()
 
 #ifdef DEBUG_SERIAL
   pinMode(PIN_RX, INPUT);
-  pinMode(PIN_TX, OUTPUT);
+  //pinMode(PIN_TX, OUTPUT);
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
 #endif
 
   enableOutputPins();
@@ -120,9 +124,11 @@ void setup()
 
 void system_sleep();
 
+uint32_t ledOnSince;
+
 void dozeStateHandler()
 {
-  #ifdef LED_ACTIVE
+  #ifdef LED_ACTIVE2
     static uint8_t skip = LED_SKIPCOUNT;
     if(--skip == 0)
     {
@@ -132,11 +138,19 @@ void dozeStateHandler()
   #else
       COUT_PRINTLN("pulse"); // I belive send is synchronous, so we don't need to delay to flush buffer
   #endif
+      //delay(30);
       skip = LED_SKIPCOUNT;
       digitalWrite(PIN_LED,LOW);
     }
 
   #endif
+
+  #ifdef LED_ACTIVE
+    // wait briefly just so LED is visible
+    while(millis() < (ledOnSince + 30))
+      delay(1);
+  #endif
+
     disableOutputPins();
     // Q: is that going to be an issue with the switch itself?
     // will the switch be OK with a floating line? or might something
@@ -150,16 +164,42 @@ void dozeStateHandler()
     enableOutputPins();
 }
 
-void loop()
+inline void ledOn()
 {
-  uint16_t vbat = analogRead(ANALOG_IN_VBAT);
-#ifdef REGULATOR_CONTROL
-  uint16_t vcap = analogRead(ANALOG_IN_CAP);
+  digitalWrite(PIN_LED,HIGH);
+  ledOnSince = millis();
+}
+
+void ledHandler()
+{
+  static uint32_t m;
+  //uint32_t _m = millis();
+#ifdef LED_ACTIVE
+  static uint8_t skip = LED_SKIPCOUNT;
+  if(state == Doze)
+  {
+    // only allow LED to stay on when skip gets to 0
+    // will get shut right off again when we re-enter sleep
+    if(--skip == 0)
+    {
+      ledOn();
+      skip = LED_SKIPCOUNT;
+    }
+  }
+  else if(state == Waking)
+  {
+    // LED stays on solid when awake
+    ledOn();
+  }
+  else if(state == EnteringDoze)
+  {
+    // do fast blink here
+    //if(millis() < ledOnSince)
+  }
+
 #endif
 
-#ifdef DEBUG_SERIAL
-  static uint32_t m;
-  uint32_t _m = millis();
+#ifdef DEBUG_SERIAL2
   // on 2 second boundaries,
   if(_m > m)
   {
@@ -169,6 +209,16 @@ void loop()
     cout.println();
     m = _m + 2000;
   }
+#endif
+}
+
+void loop()
+{
+  ledHandler();
+
+  uint16_t vbat = analogRead(ANALOG_IN_VBAT);
+#ifdef REGULATOR_CONTROL
+  uint16_t vcap = analogRead(ANALOG_IN_CAP);
 #endif
 
   //capStateMachine.process();

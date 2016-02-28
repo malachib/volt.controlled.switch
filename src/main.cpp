@@ -163,6 +163,8 @@ void loop()
   // on 2 second boundaries,
   if(_m > m)
   {
+    cout << F("state = ") << state;
+    cout.println();
     cout << F("vbat = ") << vbat << F(" thresh = ") << DIVIDED_THRESHOLD_VOLTAGE;
     cout.println();
     m = _m + 2000;

@@ -29,3 +29,4 @@ public:
 };
 
 extern CapStateMachine capStateMachine;
+extern State state;

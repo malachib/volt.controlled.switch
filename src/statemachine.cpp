@@ -13,19 +13,19 @@ State state;
 uint32_t lastAwakeTime;
 
 #define SETSTATE(s) { state = s; COUT_PRINT("State="); COUT_PRINTLN(#s); }
+//#define SETSTATE(s) state = s
 
 void belowThresholdStateHandler()
 {
   switch(state)
   {
+    case Waking:
     case Awake:
       SETSTATE(EnteringDoze);
-      //state = EnteringDoze;
       break;
 
     case EnteringDoze:
       SETSTATE(Doze);
-      //state = Doze;
       break;
 
     case Doze:

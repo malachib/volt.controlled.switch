@@ -9,9 +9,8 @@
 #ifdef DEBUG_SERIAL
 #include "SoftwareSerial.h"
 
-// TODO: move these to 0 and 1 since 3 and 4 tie up ADC channels
-#define PIN_RX 3
-#define PIN_TX 4
+#define PIN_RX PB0
+#define PIN_TX PB1
 
 SoftwareSerial Serial(PIN_RX, PIN_TX);
 

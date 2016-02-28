@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "features.h"
 #include "states.h"
 #include "Console.h"
 
@@ -11,16 +12,20 @@ State state;
 // this here & incomplete since it won't consume too many cycles or code
 uint32_t lastAwakeTime;
 
+#define SETSTATE(s) { state = s; COUT_PRINT("State="); COUT_PRINTLN(#s); }
+
 void belowThresholdStateHandler()
 {
   switch(state)
   {
     case Awake:
-      state = EnteringDoze;
+      SETSTATE(EnteringDoze);
+      //state = EnteringDoze;
       break;
 
     case EnteringDoze:
-      state = Doze;
+      SETSTATE(Doze);
+      //state = Doze;
       break;
 
     case Doze:
@@ -29,16 +34,16 @@ void belowThresholdStateHandler()
   }
 }
 
-void aboveThresholdStateHandler()
+void aboveThresholdStateHandler(uint16_t vbat)
 {
   switch(state)
   {
     case Doze:
-      state = Waking;
+      SETSTATE(Waking);
       break;
 
     case Waking:
-      state = Awake;
+      SETSTATE(Awake);
       break;
 
     case Awake:

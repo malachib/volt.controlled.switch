@@ -2,9 +2,10 @@
 #include <Adafruit_SleepyDog.h>
 #include <SystemStatus.h>
 
+#include "features.h"
 #include "states.h"
-
-#define DEBUG_SERIAL
+#include "main.h"
+#include <Console.h>
 
 #ifdef DEBUG_SERIAL
 #include "SoftwareSerial.h"
@@ -13,10 +14,6 @@
 #define PIN_TX PB1
 
 SoftwareSerial Serial(PIN_RX, PIN_TX);
-
-#define COUT_PRINTLN(s) Serial.println(F(s))
-#else
-#define COUT_PRINTLN(s) {}
 #endif
 
 // attiny45 doing a similar job, but where's the source code?
@@ -35,44 +32,32 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 // http://forum.arduino.cc/index.php?topic=139958.0
 
 // system status lib wraps up VRef usage.  Cool
-#define LED_ACTIVE
 // skipcount is number of sleep periods to skip before actually flashing the LED
 #define LED_SKIPCOUNT 4
 
 // doesn't use A0, A1, etc. like Uno and friends
 // car battery reference voltage input
-#define ANALOG_IN_VBAT 1
+#define ANALOG_IN_VBAT PB3
 // onboard capacitor reference voltage input
-#define ANALOG_IN_CAP 2
+// FIX: can't work right now because collides with PIN_SWITCH
+#define ANALOG_IN_CAP PB4
 
 // where our status LED lives
-#define PIN_LED 4
+#define PIN_LED PB2
 // pin connected to switch we take high or low depending on
 // reference voltage threshold
-#define PIN_SWITCH 0
+#define PIN_SWITCH PB4
 
 // pin connected to regulator enable
-#define PIN_REGULATOR 1
+#define PIN_REGULATOR PB0
 
-
-// voltage (millivolts)
-#define THRESHOLD_VOLTAGE 13000
-// dial in operating voltage exactly right , I plan to undervolt this sucker
-//#define OPERATING_VOLTAGE 4.5
-
-// what fixed dividers we've got out there to bring us within to operating
-// voltage range (attiny I expect around 2.5V-5.5V)
-#define VOLTAGE_DIVIDER 3.5
-
-#define DIVIDED_THRESHOLD_VOLTAGE (THRESHOLD_VOLTAGE / VOLTAGE_DIVIDER)
-
-// what minimum value to read out of ADC to continue with voltage regulator OFF
-#define DIVIDED_THRESHOLD_CAP_VOLTAGE 512
 
 void enableOutputPins()
 {
   pinMode(PIN_SWITCH, OUTPUT);
+#ifdef REGULATOR_CONTROL
   pinMode(PIN_REGULATOR, OUTPUT);
+#endif
 
 #ifdef LED_ACTIVE
   pinMode(PIN_LED, OUTPUT);
@@ -87,7 +72,9 @@ void enableOutputPins()
 void disableOutputPins()
 {
   pinMode(PIN_SWITCH, INPUT);
+#ifdef REGULATOR_CONTROL
   pinMode(PIN_REGULATOR, INPUT);
+#endif
 
 #ifdef LED_ACTIVE
   pinMode(PIN_LED, INPUT);
@@ -100,6 +87,9 @@ void disableOutputPins()
 
 void setup()
 {
+  // For debug only, give us time to connect serial debugger
+  delay(5000);
+
   // 0=16ms, 1=32ms,2=64ms,3=128ms,4=250ms,5=500ms
   // 6=1 sec,7=2 sec, 8=4 sec, 9= 8sec
   const uint8_t ii = 5; // wake up every 500ms to check for power state change
@@ -114,7 +104,9 @@ void setup()
 
   // prep analog input to see what kind of voltage values are preset
   pinMode(ANALOG_IN_VBAT, INPUT);
+#ifdef REGULATOR_CONTROL
   pinMode(ANALOG_IN_CAP, INPUT);
+#endif
 
 #ifdef DEBUG_SERIAL
   pinMode(PIN_RX, INPUT);
@@ -138,7 +130,7 @@ void dozeStateHandler()
   #ifndef DEBUG_SERIAL
       delay(30);
   #else
-      COUT_PRINTLN("pulse");
+      COUT_PRINTLN("pulse"); // I belive send is synchronous, so we don't need to delay to flush buffer
   #endif
       skip = LED_SKIPCOUNT;
       digitalWrite(PIN_LED,LOW);
@@ -161,12 +153,26 @@ void dozeStateHandler()
 void loop()
 {
   uint16_t vbat = analogRead(ANALOG_IN_VBAT);
+#ifdef REGULATOR_CONTROL
   uint16_t vcap = analogRead(ANALOG_IN_CAP);
+#endif
+
+#ifdef DEBUG_SERIAL
+  static uint32_t m;
+  uint32_t _m = millis();
+  // on 2 second boundaries,
+  if(_m > m)
+  {
+    cout << F("vbat = ") << vbat << F(" thresh = ") << DIVIDED_THRESHOLD_VOLTAGE;
+    cout.println();
+    m = _m + 2000;
+  }
+#endif
 
   //capStateMachine.process();
 
   if(vbat < DIVIDED_THRESHOLD_VOLTAGE)
     belowThresholdStateHandler();
   else
-    aboveThresholdStateHandler();
+    aboveThresholdStateHandler(vbat);
 }

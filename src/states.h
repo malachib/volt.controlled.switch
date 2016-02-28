@@ -20,7 +20,7 @@ enum CapState
 
 void dozeStateHandler();
 void belowThresholdStateHandler();
-void aboveThresholdStateHandler();
+void aboveThresholdStateHandler(uint16_t vbat);
 
 class CapStateMachine : public StateMachineStatic<CapState>
 {

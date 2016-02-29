@@ -1,5 +1,5 @@
 // represents what the very top end of our ADC is expected to read
-#define MAX_VOLTAGE 18
+#define MAX_VOLTAGE 15.7
 
 #define VCC_VOLTAGE 5
 
@@ -18,8 +18,15 @@
 //   18V = 5V
 //   12V = 3.3V (convenient coincidence)
 //   9V = 2.5V
-#define RESISTOR1 3900
-#define RESISTOR2 1500
+//#define RESISTOR1 3900
+//#define RESISTOR2 1500
+
+// this combo:
+// 15.7V = 5V
+// 13V = 4.145V
+// 9V = 2.87V
+#define RESISTOR1 470
+#define RESISTOR2 220
 
 // 10-bit adc resolution
 #define ADC_RESOLUTION 1024

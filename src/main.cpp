@@ -89,11 +89,27 @@ void disableOutputPins()
 #endif
 }
 
+
+// lets us know we're starting up properly
+void debugBlink()
+{
+  for(int i = 0; i < 6; i++)
+  {
+    digitalWrite(PIN_LED,HIGH);
+    delay(500);
+    digitalWrite(PIN_LED,LOW);
+    delay(250);
+  }
+}
+
 void setup()
 {
+  enableOutputPins();
+  debugBlink();
+
   // For debug only, give us time to connect serial debugger
 #ifdef DEBUG_SERIAL
-  delay(5000);
+  //delay(5000);
 #endif
 
   // 0=16ms, 1=32ms,2=64ms,3=128ms,4=250ms,5=500ms
@@ -120,8 +136,6 @@ void setup()
 
   Serial.begin(9600);
 #endif
-
-  enableOutputPins();
 }
 
 void system_sleep();

@@ -6,6 +6,9 @@
 // voltage above which we go active
 #define THRESHOLD_VOLTAGE 13
 
+// readings float too high by about this much
+#define THRESHOLD_ERR 0.4
+
 // adapted from http://www.ohmslawcalculator.com/voltage-divider-calculator
 // produces divided voltage from Vs input given two resisters in a voltage
 // divider circuit
@@ -44,7 +47,7 @@
 // adjust for ADC sampling rate
 #define ADC_VOLTAGE(V) (uint16_t)(VOLTAGE_DIVIDE(V, RESISTOR1, RESISTOR2) * ADC_RESOLUTION / VCC_VOLTAGE)
 
-#define DIVIDED_THRESHOLD_VOLTAGE ADC_VOLTAGE(THRESHOLD_VOLTAGE)
+#define DIVIDED_THRESHOLD_VOLTAGE ADC_VOLTAGE((THRESHOLD_VOLTAGE + THRESHOLD_ERR))
 
 // what minimum value to read out of ADC to continue with voltage regulator OFF
 #define DIVIDED_THRESHOLD_CAP_VOLTAGE 512

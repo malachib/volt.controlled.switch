@@ -20,7 +20,7 @@ enum CapState
 
 void dozeStateHandler();
 void belowThresholdStateHandler();
-void aboveThresholdStateHandler(uint16_t vbat);
+void aboveThresholdStateHandler();
 
 //void ledWaking();
 //void ledSleep();

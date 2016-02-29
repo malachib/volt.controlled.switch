@@ -19,6 +19,7 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 // attiny45 doing a similar job, but where's the source code?
 // http://austindavid.com/jm3/index.php/hardware/57-lvd-project
 
+// TODO: add trim pot to design for fine-tune adjustment to voltage sensitivity
 // TODO: need simplistic Hysteresis so that we don't accidentally bounce
 // it up and down a bunch (surface charge/sleep mode lack of draw may bring it back.. ?)
 // TODO: have a capacitor onboard and power down voltage regulator since regulator quiescent
@@ -93,10 +94,14 @@ void disableOutputPins()
 // lets us know we're starting up properly
 void debugBlink()
 {
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < 3; i++)
   {
     digitalWrite(PIN_LED,HIGH);
     delay(500);
+    digitalWrite(PIN_LED,LOW);
+    delay(250);
+    digitalWrite(PIN_LED,HIGH);
+    delay(250);
     digitalWrite(PIN_LED,LOW);
     delay(250);
   }
@@ -141,6 +146,7 @@ void setup()
 void system_sleep();
 
 uint32_t ledOnSince;
+uint16_t vbat;
 
 inline void ledOn()
 {
@@ -182,7 +188,7 @@ void dozeStateHandler()
 #endif
 }
 
-void ledHandler(uint16_t vbat)
+void ledHandler()
 {
   static uint32_t m;
   //uint32_t _m = millis();
@@ -196,6 +202,9 @@ void ledHandler(uint16_t vbat)
     {
       ledOn();
       skip = LED_SKIPCOUNT;
+
+      if(vbat < DIVIDED_THRESHOLD_LOWVOLTAGE)
+        skip *= 4;
     }
   }
   else if(state == Waking)
@@ -213,12 +222,20 @@ void ledHandler(uint16_t vbat)
     if(vbat == MAX_VOLTAGE)
     {
       // alert we have a high voltage situation
+      delay(100);
       ledOff();
-      delay(250);
+      delay(100);
       ledOn();
-      delay(250);
+      delay(100);
       ledOff();
-      delay(250);
+      delay(100);
+      ledOn();
+    }
+    else if(vbat < (DIVIDED_THRESHOLD_VOLTAGE + DIVIDED_NEARBY))
+    {
+      delay(500);
+      ledOff();
+      delay(500);
       ledOn();
     }
   }
@@ -228,9 +245,9 @@ void ledHandler(uint16_t vbat)
 
 void loop()
 {
-  uint16_t vbat = analogRead(ANALOG_IN_VBAT);
+  vbat = analogRead(ANALOG_IN_VBAT);
 
-  ledHandler(vbat);
+  ledHandler();
 
 #ifdef REGULATOR_CONTROL
   uint16_t vcap = analogRead(ANALOG_IN_CAP);
@@ -257,5 +274,5 @@ void loop()
   if(vbat < DIVIDED_THRESHOLD_VOLTAGE)
     belowThresholdStateHandler();
   else
-    aboveThresholdStateHandler(vbat);
+    aboveThresholdStateHandler();
 }

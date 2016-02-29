@@ -34,7 +34,7 @@ void belowThresholdStateHandler()
   }
 }
 
-void aboveThresholdStateHandler(uint16_t vbat)
+void aboveThresholdStateHandler()
 {
   switch(state)
   {

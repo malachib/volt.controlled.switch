@@ -6,8 +6,15 @@
 // voltage above which we go active
 #define THRESHOLD_VOLTAGE 13
 
+// going this low, we blink LED more slowly
+#define THRESHOLD_LOWVOLTAGE 9
+
 // readings float too high by about this much
-#define THRESHOLD_ERR 0.4
+#define THRESHOLD_ERR 0.5
+
+// this is the "wiggle" area, flash LED gently to indicate we're near
+// our threshold
+#define VOLTAGE_NEARBY 0.1
 
 // adapted from http://www.ohmslawcalculator.com/voltage-divider-calculator
 // produces divided voltage from Vs input given two resisters in a voltage
@@ -50,5 +57,11 @@
 
 #define DIVIDED_THRESHOLD_VOLTAGE ADC_VOLTAGE((THRESHOLD_VOLTAGE + THRESHOLD_ERR))
 
+#define DIVIDED_THRESHOLD_LOWVOLTAGE ADC_VOLTAGE(THRESHOLD_LOWVOLTAGE)
+
+#define DIVIDED_NEARBY ADC_VOLTAGE(VOLTAGE_NEARBY)
+
 // what minimum value to read out of ADC to continue with voltage regulator OFF
 #define DIVIDED_THRESHOLD_CAP_VOLTAGE 512
+
+extern uint16_t vbat;

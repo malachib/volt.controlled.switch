@@ -128,6 +128,17 @@ void system_sleep();
 
 uint32_t ledOnSince;
 
+inline void ledOn()
+{
+  digitalWrite(PIN_LED,HIGH);
+  ledOnSince = millis();
+}
+
+inline void ledOff()
+{
+  digitalWrite(PIN_LED,LOW);
+}
+
 void dozeStateHandler()
 {
   #ifdef LED_ACTIVE
@@ -138,7 +149,10 @@ void dozeStateHandler()
 
   // clock doesn't run if we actually go to sleep, making our DEBUG_SERIAL wait
   // quite a long time indeed, so disable sleep during DEBUG_SERIAL
-#ifndef DEBUG_SERIAL
+#ifdef DEBUG_SERIAL
+    ledOff();
+    delay(500);
+#else
     disableOutputPins();
     // Q: is that going to be an issue with the switch itself?
     // will the switch be OK with a floating line? or might something
@@ -152,12 +166,6 @@ void dozeStateHandler()
     // not sure why but debug serial doesn't recover well from this
     enableOutputPins();
 #endif
-}
-
-inline void ledOn()
-{
-  digitalWrite(PIN_LED,HIGH);
-  ledOnSince = millis();
 }
 
 void ledHandler()

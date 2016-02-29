@@ -4,10 +4,10 @@ using namespace util;
 
 enum State
 {
-  Waking,
-  Awake,
+  Waking, // Starting up/transitioning to awake state
+  Awake,  // Solid above threshold
   EnteringDoze,
-  Doze,
+  Doze,   // Solid below threshold
   Sleep
 };
 

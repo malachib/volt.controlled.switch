@@ -217,7 +217,6 @@ void loop()
 
   //capStateMachine.process();
 
-  //if(vbat < 3.611)
   if(vbat < DIVIDED_THRESHOLD_VOLTAGE)
     belowThresholdStateHandler();
   else

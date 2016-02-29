@@ -22,11 +22,11 @@
 //#define RESISTOR2 1500
 
 // this combo:
-// 15.7V = 5V
+// 15.7V = 5.006V
 // 13V = 4.145V
 // 9V = 2.87V
-#define RESISTOR1 470
-#define RESISTOR2 220
+#define RESISTOR1 4700
+#define RESISTOR2 2200
 
 // 10-bit adc resolution
 #define ADC_RESOLUTION 1024

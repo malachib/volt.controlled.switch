@@ -25,8 +25,8 @@
 // 15.7V = 5.006V
 // 13V = 4.145V
 // 9V = 2.87V
-#define RESISTOR1 4700
-#define RESISTOR2 2200
+#define RESISTOR1 47000
+#define RESISTOR2 22000
 
 // 10-bit adc resolution
 #define ADC_RESOLUTION 1024

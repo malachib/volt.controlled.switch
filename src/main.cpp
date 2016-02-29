@@ -64,9 +64,9 @@ void enableOutputPins()
 #endif
 
 #ifdef DEBUG_SERIAL
-  pinMode(PIN_TX, OUTPUT);
+  //pinMode(PIN_TX, OUTPUT);
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
 #endif
 }
 
@@ -83,16 +83,18 @@ void disableOutputPins()
 #endif
 
 #ifdef DEBUG_SERIAL
-  Serial.end();
+  //Serial.end();
 
-  pinMode(PIN_TX, INPUT);
+  //pinMode(PIN_TX, INPUT);
 #endif
 }
 
 void setup()
 {
   // For debug only, give us time to connect serial debugger
-  //delay(5000);
+#ifdef DEBUG_SERIAL
+  delay(5000);
+#endif
 
   // 0=16ms, 1=32ms,2=64ms,3=128ms,4=250ms,5=500ms
   // 6=1 sec,7=2 sec, 8=4 sec, 9= 8sec
@@ -114,9 +116,9 @@ void setup()
 
 #ifdef DEBUG_SERIAL
   pinMode(PIN_RX, INPUT);
-  //pinMode(PIN_TX, OUTPUT);
+  pinMode(PIN_TX, OUTPUT);
 
-  //Serial.begin(9600);
+  Serial.begin(9600);
 #endif
 
   enableOutputPins();
@@ -128,29 +130,15 @@ uint32_t ledOnSince;
 
 void dozeStateHandler()
 {
-  #ifdef LED_ACTIVE2
-    static uint8_t skip = LED_SKIPCOUNT;
-    if(--skip == 0)
-    {
-      digitalWrite(PIN_LED,HIGH);  // let led blink
-  #ifndef DEBUG_SERIAL
-      delay(30);
-  #else
-      COUT_PRINTLN("pulse"); // I belive send is synchronous, so we don't need to delay to flush buffer
-  #endif
-      //delay(30);
-      skip = LED_SKIPCOUNT;
-      digitalWrite(PIN_LED,LOW);
-    }
-
-  #endif
-
   #ifdef LED_ACTIVE
     // wait briefly just so LED is visible
     while(millis() < (ledOnSince + 30))
       delay(1);
   #endif
 
+  // clock doesn't run if we actually go to sleep, making our DEBUG_SERIAL wait
+  // quite a long time indeed, so disable sleep during DEBUG_SERIAL
+#ifndef DEBUG_SERIAL
     disableOutputPins();
     // Q: is that going to be an issue with the switch itself?
     // will the switch be OK with a floating line? or might something
@@ -161,7 +149,9 @@ void dozeStateHandler()
     //  1. sleep mode power usage
     //  2. whether input does stay in PULLUP mode while asleep
     system_sleep();
+    // not sure why but debug serial doesn't recover well from this
     enableOutputPins();
+#endif
 }
 
 inline void ledOn()
@@ -198,18 +188,6 @@ void ledHandler()
   }
 
 #endif
-
-#ifdef DEBUG_SERIAL2
-  // on 2 second boundaries,
-  if(_m > m)
-  {
-    cout << F("state = ") << state;
-    cout.println();
-    cout << F("vbat = ") << vbat << F(" thresh = ") << DIVIDED_THRESHOLD_VOLTAGE;
-    cout.println();
-    m = _m + 2000;
-  }
-#endif
 }
 
 void loop()
@@ -221,8 +199,25 @@ void loop()
   uint16_t vcap = analogRead(ANALOG_IN_CAP);
 #endif
 
+#ifdef DEBUG_SERIAL
+  static uint32_t m;
+  uint32_t _m = millis();
+
+  // on 2 second boundaries,
+  if(_m > m)
+  {
+    cout << F("state = ") << state;
+    cout.println();
+    cout << F("vbat = ") << vbat << F(" thresh = ") << DIVIDED_THRESHOLD_VOLTAGE;
+    cout.println();
+    m = _m + 2000;
+  }
+#endif
+
+
   //capStateMachine.process();
 
+  //if(vbat < 3.611)
   if(vbat < DIVIDED_THRESHOLD_VOLTAGE)
     belowThresholdStateHandler();
   else

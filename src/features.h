@@ -1,6 +1,6 @@
 #define LED_ACTIVE
 
-//#define DEBUG_SERIAL
+#define DEBUG_SERIAL
 
 #ifdef DEBUG_SERIAL
 #define COUT_PRINT(s) Serial.print(F(s))

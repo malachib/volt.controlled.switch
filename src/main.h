@@ -38,6 +38,7 @@
 
 // 10-bit adc resolution
 #define ADC_RESOLUTION 1024
+#define ADC_MAX (ADC_RESOLUTION - 1)
 
 // what fixed dividers we've got out there to bring us within to operating
 // voltage range (attiny I expect around 2.5V-5.5V)

@@ -182,7 +182,7 @@ void dozeStateHandler()
 #endif
 }
 
-void ledHandler()
+void ledHandler(uint16_t vbat)
 {
   static uint32_t m;
   //uint32_t _m = millis();
@@ -208,15 +208,30 @@ void ledHandler()
     // do fast blink here
     //if(millis() < ledOnSince)
   }
+  else if(state == Awake)
+  {
+    if(vbat == MAX_VOLTAGE)
+    {
+      // alert we have a high voltage situation
+      ledOff();
+      delay(250);
+      ledOn();
+      delay(250);
+      ledOff();
+      delay(250);
+      ledOn();
+    }
+  }
 
 #endif
 }
 
 void loop()
 {
-  ledHandler();
-
   uint16_t vbat = analogRead(ANALOG_IN_VBAT);
+
+  ledHandler(vbat);
+
 #ifdef REGULATOR_CONTROL
   uint16_t vcap = analogRead(ANALOG_IN_CAP);
 #endif

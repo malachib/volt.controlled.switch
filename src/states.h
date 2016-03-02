@@ -8,7 +8,8 @@ enum State
   Awake,  // Solid above threshold
   EnteringDoze,
   Doze,   // Solid below threshold
-  Sleep
+  EnteringSleep,
+  Sleep   // Below threshold for quite some time
 };
 
 enum CapState

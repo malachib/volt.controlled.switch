@@ -1,4 +1,7 @@
+#pragma once
+
 // represents what the very top end of our ADC is expected to read
+#define MAX_MILLIVOLT 20150
 #define MAX_VOLTAGE 20.15
 
 #define VCC_VOLTAGE 5

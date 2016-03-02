@@ -2,9 +2,11 @@
 #include <Adafruit_SleepyDog.h>
 #include <SystemStatus.h>
 
+
 #include "features.h"
 #include "states.h"
 #include "main.h"
+#include "lcd.h"
 #include <Console.h>
 
 #ifdef DEBUG_SERIAL
@@ -43,8 +45,13 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 // FIX: can't work right now because collides with PIN_SWITCH
 #define ANALOG_IN_CAP PB4
 
+#ifdef LCD_ACTIVE
+// where our status LED lives
+#define PIN_LED PB1
+#else
 // where our status LED lives
 #define PIN_LED PB2
+#endif
 // pin connected to switch we take high or low depending on
 // reference voltage threshold
 #define PIN_SWITCH PB4
@@ -110,6 +117,7 @@ void debugBlink()
 void setup()
 {
   enableOutputPins();
+  lcd_setup();
   debugBlink();
 
   // For debug only, give us time to connect serial debugger
@@ -268,6 +276,7 @@ void loop()
   }
 #endif
 
+  lcd_showvbat();
 
   //capStateMachine.process();
 

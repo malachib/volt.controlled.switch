@@ -1,3 +1,6 @@
 [submodule "lib/util.embedded"]
 	path = lib/util.embedded
 	url = git@github.com:malachib/util.embedded.git
+[submodule "lib/TinyWireM"]
+	path = lib/TinyWireM
+	url = https://github.com/adafruit/TinyWireM.git

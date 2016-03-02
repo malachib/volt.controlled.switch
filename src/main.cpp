@@ -7,6 +7,7 @@
 #include "states.h"
 #include "main.h"
 #include "lcd.h"
+#include "pins.h"
 #include <Console.h>
 
 #ifdef DEBUG_SERIAL
@@ -52,9 +53,6 @@ SoftwareSerial Serial(PIN_RX, PIN_TX);
 // where our status LED lives
 #define PIN_LED PB2
 #endif
-// pin connected to switch we take high or low depending on
-// reference voltage threshold
-#define PIN_SWITCH PB4
 
 // pin connected to regulator enable
 #define PIN_REGULATOR PB0
@@ -171,7 +169,7 @@ void dozeStateHandler()
 {
   #ifdef LED_ACTIVE
     // wait briefly just so LED is visible
-    while(millis() < (ledOnSince + 30))
+    while(millis() < (ledOnSince + 20))
       delay(1);
   #endif
 
@@ -202,7 +200,7 @@ void ledHandler()
   //uint32_t _m = millis();
 #ifdef LED_ACTIVE
   static uint8_t skip = LED_SKIPCOUNT;
-  if(state == Doze)
+  if(state == Doze || state == Sleep)
   {
     // only allow LED to stay on when skip gets to 0
     // will get shut right off again when we re-enter sleep

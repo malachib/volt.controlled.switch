@@ -3,7 +3,9 @@
 #include "features.h"
 #include "states.h"
 #include "Console.h"
+#include "main.h"
 #include "lcd.h"
+#include "pins.h"
 
 
 State state;
@@ -18,6 +20,17 @@ uint32_t uninterruptedDozeCycles = 0;
 #define SETSTATE(s) { state = s; COUT_PRINT("State="); COUT_PRINTLN(#s); }
 //#define SETSTATE(s) state = s
 
+void powerOnTracker()
+{
+  digitalWrite(PIN_SWITCH, HIGH);
+}
+
+
+void powerOffTracker()
+{
+  digitalWrite(PIN_SWITCH, LOW);
+}
+
 void belowThresholdStateHandler()
 {
   switch(state)
@@ -28,18 +41,18 @@ void belowThresholdStateHandler()
       break;
 
     case EnteringDoze:
+      powerOffTracker();
       lcd_setBacklight(false);
       SETSTATE(Doze);
       break;
 
     case EnteringSleep:
-      lcd_off();
       SETSTATE(Sleep);
       break;
 
     case Doze:
     case Sleep:
-      if(uninterruptedDozeCycles++ == 20)
+      if(uninterruptedDozeCycles++ == 40) // should be 20 seconds, but feeling more like 10
       {
         SETSTATE(EnteringSleep);
         return;
@@ -51,15 +64,22 @@ void belowThresholdStateHandler()
 
 void aboveThresholdStateHandler()
 {
+  uninterruptedDozeCycles = 0;
+
   switch(state)
   {
     case Doze:
+      lcd_setBacklight(true);
+      SETSTATE(Waking);
+      break;
+
     case Sleep:
+      //lcd_on();
       SETSTATE(Waking);
       break;
 
     case Waking:
-      lcd_setBacklight(true);
+      powerOnTracker();
       SETSTATE(Awake);
       break;
 

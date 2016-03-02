@@ -2,9 +2,16 @@
 
 // represents what the very top end of our ADC is expected to read
 #define MAX_MILLIVOLT 20150
+//#define MAX_VOLTAGE ((double)MAX_MILLIVOLT / 1000)
 #define MAX_VOLTAGE 20.15
 
-#define VCC_VOLTAGE 5
+//#define VCC_VOLTAGE 5
+// running off the 3xAA battery pack.  remember to change this back!
+// looks like Attiny is boosting it up to 5v again
+#define VCC_MILLIVOLT 5000
+#define VCC_VOLTAGE 5.0
+#define VCC_VOLTAGE_STR "5.0"
+//#define STR_NUMERIC(n) (## n)
 
 // voltage above which we go active
 #define THRESHOLD_VOLTAGE 13
@@ -13,7 +20,7 @@
 #define THRESHOLD_LOWVOLTAGE 9
 
 // readings float too high by about this much
-#define THRESHOLD_ERR 0.5
+#define THRESHOLD_ERR 0.2
 
 // this is the "wiggle" area, flash LED gently to indicate we're near
 // our threshold

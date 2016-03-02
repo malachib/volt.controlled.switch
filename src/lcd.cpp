@@ -47,7 +47,10 @@ void lcd_setup()
 
 void lcd_showvbat()
 {
+  static uint32_t nextDraw = 0;
+
   uint32_t converted = vbat;
+  uint32_t m = millis();
 
   //converted *= MAX_MILLIVOLT;
   //converted /= ADC_RESOLUTION;
@@ -55,9 +58,18 @@ void lcd_showvbat()
   lcd.setCursor ( 12, 0 );
   lcd.print(SystemStatus.getVCC());
   lcd.setCursor ( 4, 1 );
-  lcd.print("     ");
-  lcd.setCursor ( 4, 1 );
-  lcd.print (converted);
+
+  if(m > nextDraw)
+  {
+    if(converted < 10000) lcd.print(' ');
+    if(converted < 1000) lcd.print(' ');
+    if(converted < 100) lcd.print(' ');
+    if(converted < 10) lcd.print(' ');
+
+    lcd.print (converted);
+
+    nextDraw += 250; // update 4x a second max to avoid flicker (left padding avoids some flicker already)
+  }
 }
 
 void lcd_off()

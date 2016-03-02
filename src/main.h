@@ -2,14 +2,14 @@
 
 // represents what the very top end of our ADC is expected to read
 #define MAX_MILLIVOLT 20150
-//#define MAX_VOLTAGE ((double)MAX_MILLIVOLT / 1000)
-#define MAX_VOLTAGE 20.15
+#define MAX_VOLTAGE ((double)MAX_MILLIVOLT / 1000)
+//#define MAX_VOLTAGE 20.15
 
 //#define VCC_VOLTAGE 5
 // running off the 3xAA battery pack.  remember to change this back!
 // looks like Attiny is boosting it up to 5v again
 #define VCC_MILLIVOLT 5000
-#define VCC_VOLTAGE 5.0
+#define VCC_VOLTAGE (((double)VCC_MILLIVOLT) / 1000)
 #define VCC_VOLTAGE_STR "5.0"
 //#define STR_NUMERIC(n) (## n)
 

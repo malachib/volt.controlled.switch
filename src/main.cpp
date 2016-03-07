@@ -10,6 +10,9 @@
 #include "pins.h"
 #include <Console.h>
 
+#include <avr/wdt.h>
+
+
 #ifdef DEBUG_SERIAL
 #include "SoftwareSerial.h"
 
@@ -123,6 +126,7 @@ void setup()
   //delay(5000);
 #endif
 
+#ifdef UNUSED
   // 0=16ms, 1=32ms,2=64ms,3=128ms,4=250ms,5=500ms
   // 6=1 sec,7=2 sec, 8=4 sec, 9= 8sec
   const uint8_t ii = 5; // wake up every 500ms to check for power state change
@@ -134,6 +138,10 @@ void setup()
   bb|= (1<<WDCE);
 
   Watchdog.setup(bb);
+#endif
+  // NOTE: keep an eye on this brand new (but looking much better)
+  // code.
+  Watchdog.setupPreset(WDTO_500MS);
 
   // prep analog input to see what kind of voltage values are preset
   pinMode(ANALOG_IN_VBAT, INPUT);

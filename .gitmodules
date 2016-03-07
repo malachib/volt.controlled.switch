@@ -4,3 +4,9 @@
 [submodule "lib/TinyWireM"]
 	path = lib/TinyWireM
 	url = https://github.com/adafruit/TinyWireM.git
+[submodule "lib/Adafruit_SleepyDog"]
+	path = lib/Adafruit_SleepyDog
+	url = git@github.com:malachib/Adafruit_SleepyDog.git
+[submodule "lib/ArduinoSystemStatus"]
+	path = lib/ArduinoSystemStatus
+	url = https://github.com/cano64/ArduinoSystemStatus.git

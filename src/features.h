@@ -1,7 +1,7 @@
 #pragma once
 
 #define LED_ACTIVE
-#define LCD_ACTIVE
+//#define LCD_ACTIVE
 
 //#define DEBUG_SERIAL
 

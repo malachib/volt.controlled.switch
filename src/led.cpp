@@ -73,12 +73,17 @@ void ledHandler()
       ledFlash(100);
       ledFlash(100);
     }
+    // this is supposed to flash LED a special way when we get close
+    // to our threshold.  The trouble is, the delay incurred here makes
+    // us unacceptably slow to respond to a voltage loss scenario,
+    // so temporarily disabling.  The way to make this work is to use
+    // the old millis() > non blocking version
     else if(vbat < (DIVIDED_THRESHOLD_VOLTAGE + DIVIDED_NEARBY))
     {
       // NOTE: This might get reset by WDT, although my WDT code implicity
       // shuts off reset feature; so keep an eye on whether we reset during
       // awake-mode low voltage condition
-      ledFlash(500);
+      //ledFlash(500);
     }
   }
 

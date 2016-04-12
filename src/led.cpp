@@ -12,6 +12,23 @@ uint32_t ledOnSince;
 
 extern uint16_t vbat;
 
+// lets us know we're starting up properly
+void debugBlink()
+{
+  for(int i = 0; i < 3; i++)
+  {
+    digitalWrite(PIN_LED,HIGH);
+    delay(500);
+    digitalWrite(PIN_LED,LOW);
+    delay(250);
+    digitalWrite(PIN_LED,HIGH);
+    delay(250);
+    digitalWrite(PIN_LED,LOW);
+    delay(250);
+  }
+}
+
+
 void ledHandler()
 {
   static uint32_t m;
@@ -27,6 +44,8 @@ void ledHandler()
       ledOn();
       skip = LED_SKIPCOUNT;
 
+      // we won't blink for 4x the periods if voltage is
+      // below threshold
       if(vbat < DIVIDED_THRESHOLD_LOWVOLTAGE)
         skip *= 4;
     }

@@ -1,10 +1,11 @@
 #include <Arduino.h>
 
 #include "features.h"
+
+#ifdef LCD_ACTIVE
 #include "main.h"
 #include "lcd.h"
 
-#ifdef LCD_ACTIVE
 #include <TinyWireM.h>
 #include <LiquidCrystal_I2C.h>
 

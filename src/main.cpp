@@ -1,6 +1,7 @@
 #include <Arduino.h>
-#include <Adafruit_SleepyDog.h>
+//#include <Adafruit_SleepyDog.h>
 #include <SystemStatus.h>
+#include <fact/watchdog.h>
 
 
 #include "features.h"
@@ -15,6 +16,7 @@
 
 void ledHandler();
 void system_sleep();
+void debugBlink();
 
 
 void enableOutputPins()
@@ -55,22 +57,6 @@ void disableOutputPins()
 }
 
 
-// lets us know we're starting up properly
-void debugBlink()
-{
-  for(int i = 0; i < 3; i++)
-  {
-    digitalWrite(PIN_LED,HIGH);
-    delay(500);
-    digitalWrite(PIN_LED,LOW);
-    delay(250);
-    digitalWrite(PIN_LED,HIGH);
-    delay(250);
-    digitalWrite(PIN_LED,LOW);
-    delay(250);
-  }
-}
-
 void setup()
 {
   enableOutputPins();
@@ -83,8 +69,8 @@ void setup()
 #endif
 
   // NOTE: keep an eye on this brand new (but looking much better)
-  // code.
-  Watchdog.setupPreset(WDTO_500MS);
+  // code.  This wakes us up from sleep
+  Watchdog.enable(WDTO_500MS);
 
   // prep analog input to see what kind of voltage values are preset
   pinMode(ANALOG_IN_VBAT, INPUT);
@@ -104,16 +90,16 @@ uint16_t vbat;
 
 void dozeStateHandler()
 {
-  #ifdef LED_ACTIVE
-    // wait briefly just so LED is visible
-    while(millis() < (ledOnSince + 20))
-      delay(1);
-  #endif
+#ifdef LED_ACTIVE
+  // wait briefly just so LED is visible
+  while(millis() < (ledOnSince + 20)) delay(1);
+
+  ledOff();
+#endif
 
   // clock doesn't run if we actually go to sleep, making our DEBUG_SERIAL wait
   // quite a long time indeed, so disable sleep during DEBUG_SERIAL
 #ifdef DEBUG_SERIAL
-    ledOff();
     delay(500);
 #else
     disableOutputPins();
@@ -134,6 +120,8 @@ void dozeStateHandler()
 
 void loop()
 {
+  Watchdog.reset();
+  
   vbat = analogRead(ANALOG_IN_VBAT);
 
   ledHandler();

@@ -75,6 +75,9 @@ void ledHandler()
     }
     else if(vbat < (DIVIDED_THRESHOLD_VOLTAGE + DIVIDED_NEARBY))
     {
+      // NOTE: This might get reset by WDT, although my WDT code implicity
+      // shuts off reset feature; so keep an eye on whether we reset during
+      // awake-mode low voltage condition
       ledFlash(500);
     }
   }

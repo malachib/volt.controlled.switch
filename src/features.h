@@ -7,6 +7,9 @@
 #define SLEEP_ENABLED
 //#define CONSOLE_ACTIVE
 
+// unfinished feature to power down/off regulator in pulses and
+// draw power from a capacitor to save electricity
+//#define REGULATOR_CONTROL
 
 #define DEBUG_SERIAL
 

@@ -1,5 +1,5 @@
 // pin connected to switch we take high or low depending on
-// reference voltage threshold
+// reference voltage (ANALOG_IN_VBAT) threshold
 #define PIN_SWITCH PB4
 
 // doesn't use A0, A1, etc. like Uno and friends
@@ -21,7 +21,9 @@
 #define PIN_LED PB2
 #endif
 
-// pin connected to regulator enable
+// pin connected to regulator enable; this would be used with ANALOG_IN_CAP
+// to bounce regulator on and off.  Not needed if driving ATtiny direct from
+// a smart buck converter
 #define PIN_REGULATOR PB0
 
 #define PIN_RX PB0

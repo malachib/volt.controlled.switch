@@ -53,12 +53,15 @@ void setup()
 
   // For debug only, give us time to connect serial debugger
 #ifdef DEBUG_SERIAL
-  delay(5000);
+  //delay(5000);
 #endif
 
   // NOTE: We need ISR on, otherwise we don't wake up from sleep
+  // systemReset defaults to OFF
   Watchdog.isr.on();
   Watchdog.enable(WDTO_500MS);
+  //Watchdog.prescalar.cache(WDTO_500MS);
+  //Watchdog.enable();
 
   // prep analog input to see what kind of voltage values are preset
   pinMode(ANALOG_IN_VBAT, INPUT);

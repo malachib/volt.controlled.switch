@@ -102,6 +102,14 @@ void dozeStateHandler()
 }
 
 
+void printCurrentState()
+{
+  cout << F("state = ") << state;
+  cout.println();
+  cout << F("vbat = ") << vbat << F(" thresh = ") << DIVIDED_THRESHOLD_VOLTAGE;
+  cout.println();
+}
+
 void loop()
 {
   Watchdog.reset();
@@ -111,15 +119,26 @@ void loop()
   ledHandler();
 
 #ifdef DEBUG_SERIAL
-  static uint32_t m = 0;
+  const uint16_t timeout = 2000;
 
   // on 2 second boundaries,
-  if((m++ % 4) == 0)
+  // this means we haven't been sleeping, which means the built-in delay
+  // of being asleep doesn't exist.  So use millis()
+  if(state == Awake)
   {
-    cout << F("state = ") << state;
-    cout.println();
-    cout << F("vbat = ") << vbat << F(" thresh = ") << DIVIDED_THRESHOLD_VOLTAGE;
-    cout.println();
+    static uint32_t m = 0;
+    if(millis() > m)
+    {
+      printCurrentState();
+      m += timeout;
+    }
+  }
+  // all other states we assume built-in sleep delay is active, so
+  // use a simple counter instead of a timer
+  else
+  {
+    static uint8_t m = 0;
+    if((m++ % 4) == 0) printCurrentState();
   }
 #endif
 

@@ -16,6 +16,14 @@
 // voltage above which we go active
 #define THRESHOLD_VOLTAGE 13
 
+// voltage threshold range within which we take no action. i.e. if
+// THRESHOLD_VOLTAGE is 12.5, then we only ACTIVE at 12.9 and switch OFF
+// at 12.1.
+// If we're OFF at 12.1 and go to 12.5, we stay OFF
+// If we're ON at 12.9 and go to 12.5 we stay ON
+// NOTE: Feature not yet implemented
+#define THRESHOLD_FLOAT 0.4
+
 // going this low, we blink LED more slowly
 #define THRESHOLD_LOWVOLTAGE 9
 
@@ -70,6 +78,11 @@
 #define DIVIDED_THRESHOLD_LOWVOLTAGE ADC_VOLTAGE(THRESHOLD_LOWVOLTAGE)
 
 #define DIVIDED_NEARBY ADC_VOLTAGE(VOLTAGE_NEARBY)
+
+// For use with THRESHOLD_FLOAT
+// NOTE: not used yet
+#define DIVIDED_THRESHOLD_VOLTAGE_UPPER ADC_VOLTAGE((THRESHOLD_VOLTAGE + THRESHOLD_FLOAT + THRESHOLD_ERR))
+#define DIVIDED_THRESHOLD_VOLTAGE_LOWER ADC_VOLTAGE((THRESHOLD_VOLTAGE - THRESHOLD_FLOAT + THRESHOLD_ERR))
 
 // what minimum value to read out of ADC to continue with voltage regulator OFF
 #define DIVIDED_THRESHOLD_CAP_VOLTAGE 512

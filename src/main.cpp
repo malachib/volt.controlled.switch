@@ -44,6 +44,9 @@ void disableOutputPins()
 #endif
 }
 
+const uint16_t wdto_ms = 500;
+// compiler for some reason doesn't optimize this line out
+//const uint8_t wdto = WatchdogControl::getWDTOfromMS<wdto_ms>();
 
 void setup()
 {
@@ -58,9 +61,10 @@ void setup()
 
   // NOTE: We need ISR on, otherwise we don't wake up from sleep
   // systemReset defaults to OFF
+  uint8_t wdto = Watchdog.getWDTOfromMS<wdto_ms>();
   Watchdog.isr.on();
-  Watchdog.enable(WDTO_500MS);
-  //Watchdog.prescalar.cache(WDTO_500MS);
+  Watchdog.enable(wdto);
+  //Watchdog.prescalar.cache(wdto);
   //Watchdog.enable();
 
   // prep analog input to see what kind of voltage values are preset
@@ -121,6 +125,8 @@ void loop()
 #ifdef DEBUG_SERIAL
   const uint16_t timeout = 2000;
 
+  static_assert(timeout % wdto_ms == 0, "timeout and wdto_ms must be evenly divisible");
+
   // on 2 second boundaries,
   // this means we haven't been sleeping, which means the built-in delay
   // of being asleep doesn't exist.  So use millis()
@@ -138,7 +144,7 @@ void loop()
   else
   {
     static uint8_t m = 0;
-    if((m++ % 4) == 0) printCurrentState();
+    if((m++ % (timeout / wdto_ms)) == 0) printCurrentState();
   }
 #endif
 

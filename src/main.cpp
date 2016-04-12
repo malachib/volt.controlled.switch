@@ -29,12 +29,6 @@ void enableOutputPins()
 #ifdef LED_ACTIVE
   pinMode(PIN_LED, OUTPUT);
 #endif
-
-#ifdef DEBUG_SERIAL
-  //pinMode(PIN_TX, OUTPUT);
-
-  //cout.begin(9600);
-#endif
 }
 
 
@@ -47,12 +41,6 @@ void disableOutputPins()
 
 #ifdef LED_ACTIVE
   pinMode(PIN_LED, INPUT);
-#endif
-
-#ifdef DEBUG_SERIAL
-  //cout.end();
-
-  //pinMode(PIN_TX, INPUT);
 #endif
 }
 

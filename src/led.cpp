@@ -12,6 +12,14 @@ uint32_t ledOnSince;
 
 extern uint16_t vbat;
 
+void ledFlash(uint16_t d)
+{
+  digitalWrite(PIN_LED,HIGH);
+  delay(d);
+  digitalWrite(PIN_LED,LOW);
+  delay(d);
+}
+
 // lets us know we're starting up properly
 void debugBlink()
 {
@@ -21,18 +29,15 @@ void debugBlink()
     delay(500);
     digitalWrite(PIN_LED,LOW);
     delay(250);
-    digitalWrite(PIN_LED,HIGH);
-    delay(250);
-    digitalWrite(PIN_LED,LOW);
-    delay(250);
+    ledFlash(250);
   }
 }
 
 
 void ledHandler()
 {
-  static uint32_t m;
-  //uint32_t _m = millis();
+  //static uint32_t m;
+
 #ifdef LED_ACTIVE
   static uint8_t skip = LED_SKIPCOUNT;
   if(state == Doze || state == Sleep)
@@ -65,21 +70,12 @@ void ledHandler()
     if(vbat == MAX_VOLTAGE)
     {
       // alert we have a high voltage situation
-      delay(100);
-      ledOff();
-      delay(100);
-      ledOn();
-      delay(100);
-      ledOff();
-      delay(100);
-      ledOn();
+      ledFlash(100);
+      ledFlash(100);
     }
     else if(vbat < (DIVIDED_THRESHOLD_VOLTAGE + DIVIDED_NEARBY))
     {
-      delay(500);
-      ledOff();
-      delay(500);
-      ledOn();
+      ledFlash(500);
     }
   }
 

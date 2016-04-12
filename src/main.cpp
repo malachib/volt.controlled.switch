@@ -107,10 +107,6 @@ void loop()
 
   ledHandler();
 
-#ifdef REGULATOR_CONTROL
-  uint16_t vcap = analogRead(ANALOG_IN_CAP);
-#endif
-
 #ifdef DEBUG_SERIAL
   static uint32_t m = 0;
 
@@ -125,8 +121,6 @@ void loop()
 #endif
 
   lcd_showvbat();
-
-  //capStateMachine.process();
 
   if(vbat < DIVIDED_THRESHOLD_VOLTAGE)
     belowThresholdStateHandler();

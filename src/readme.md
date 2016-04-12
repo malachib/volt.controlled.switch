@@ -16,3 +16,10 @@ interesting info http://web.engr.oregonstate.edu/~traylor/ece473/lectures/reset.
 reference voltage stuff may be more convenient than tying up an ADC pin:
 http://forum.arduino.cc/index.php?topic=223897.0
 http://forum.arduino.cc/index.php?topic=139958.0
+
+Look into whether we need to shut off WDT during servicing - it's unclear
+whether it actually will do a reset (although I'm betting yes).  If so,
+I want to retain the calculated WDT prescalar/enable and reissue that rather than recalc it every time.
+
+Also can't find any official docs for setup_watchdog or do_sleep, yet they
+seem to be avr library functions

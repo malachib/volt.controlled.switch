@@ -33,7 +33,7 @@ void enableOutputPins()
 #ifdef DEBUG_SERIAL
   //pinMode(PIN_TX, OUTPUT);
 
-  //Serial.begin(9600);
+  //cout.begin(9600);
 #endif
 }
 
@@ -50,7 +50,7 @@ void disableOutputPins()
 #endif
 
 #ifdef DEBUG_SERIAL
-  //Serial.end();
+  //cout.end();
 
   //pinMode(PIN_TX, INPUT);
 #endif
@@ -65,11 +65,11 @@ void setup()
 
   // For debug only, give us time to connect serial debugger
 #ifdef DEBUG_SERIAL
-  //delay(5000);
+  delay(5000);
 #endif
 
-  // NOTE: keep an eye on this brand new (but looking much better)
-  // code.  This wakes us up from sleep
+  // NOTE: We need ISR on, otherwise we don't wake up from sleep
+  Watchdog.isr.on();
   Watchdog.enable(WDTO_500MS);
 
   // prep analog input to see what kind of voltage values are preset
@@ -97,31 +97,24 @@ void dozeStateHandler()
   ledOff();
 #endif
 
-  // clock doesn't run if we actually go to sleep, making our DEBUG_SERIAL wait
-  // quite a long time indeed, so disable sleep during DEBUG_SERIAL
-#ifdef DEBUG_SERIAL
-    delay(500);
-#else
-    disableOutputPins();
-    // Q: is that going to be an issue with the switch itself?
-    // will the switch be OK with a floating line? or might something
-    // externally change its state causing an unwanted on or off?
-    // can we
-    // properly sleep if we are holding the line to a certain state?
-    //pinMode(PIN_SWITCH, INPUT_PULLUP); // see how well this works , measure with voltmeter:
-    //  1. sleep mode power usage
-    //  2. whether input does stay in PULLUP mode while asleep
-    system_sleep();
-    // not sure why but debug serial doesn't recover well from this
-    enableOutputPins();
-#endif
+  disableOutputPins();
+  // Q: is that going to be an issue with the switch itself?
+  // will the switch be OK with a floating line? or might something
+  // externally change its state causing an unwanted on or off?
+  // can we
+  // properly sleep if we are holding the line to a certain state?
+  //pinMode(PIN_SWITCH, INPUT_PULLUP); // see how well this works , measure with voltmeter:
+  //  1. sleep mode power usage
+  //  2. whether input does stay in PULLUP mode while asleep
+  system_sleep();
+  enableOutputPins();
 }
 
 
 void loop()
 {
   Watchdog.reset();
-  
+
   vbat = analogRead(ANALOG_IN_VBAT);
 
   ledHandler();
@@ -131,17 +124,15 @@ void loop()
 #endif
 
 #ifdef DEBUG_SERIAL
-  static uint32_t m;
-  uint32_t _m = millis();
+  static uint32_t m = 0;
 
   // on 2 second boundaries,
-  if(_m > m)
+  if((m++ % 4) == 0)
   {
     cout << F("state = ") << state;
     cout.println();
     cout << F("vbat = ") << vbat << F(" thresh = ") << DIVIDED_THRESHOLD_VOLTAGE;
     cout.println();
-    m = _m + 2000;
   }
 #endif
 

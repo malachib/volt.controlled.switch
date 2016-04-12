@@ -5,8 +5,12 @@
 // doesn't use A0, A1, etc. like Uno and friends
 // car battery reference voltage input
 #define ANALOG_IN_VBAT PB3
+
 // onboard capacitor reference voltage input
 // FIX: can't work right now because collides with PIN_SWITCH
+// I think I was gonna use CAP as kind of a battery backup , use it plus
+// a super small VREG to power the attiny; however I'm just gonna use
+// a regular step down switching and call it a day
 #define ANALOG_IN_CAP PB4
 
 #ifdef LCD_ACTIVE

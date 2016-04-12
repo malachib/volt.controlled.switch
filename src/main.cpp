@@ -61,9 +61,9 @@ void setup()
 
   // NOTE: We need ISR on, otherwise we don't wake up from sleep
   // systemReset defaults to OFF
-  uint8_t wdto = Watchdog.getWDTOfromMS<wdto_ms>();
-  Watchdog.isr.on();
-  Watchdog.enable(wdto);
+  uint8_t wdto = Watchdog::WDTO::fromMS<wdto_ms>();
+  Watchdog::isr.on();
+  Watchdog::enable(wdto);
   //Watchdog.prescalar.cache(wdto);
   //Watchdog.enable();
 
@@ -116,7 +116,7 @@ void printCurrentState()
 
 void loop()
 {
-  Watchdog.reset();
+  Watchdog::reset();
 
   vbat = analogRead(ANALOG_IN_VBAT);
 

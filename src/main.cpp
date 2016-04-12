@@ -12,14 +12,13 @@
 
 #include <avr/wdt.h>
 
-
 #ifdef DEBUG_SERIAL
 #include "SoftwareSerial.h"
 
 #define PIN_RX PB0
 #define PIN_TX PB1
 
-SoftwareSerial Serial(PIN_RX, PIN_TX);
+SoftwareSerial cout(PIN_RX, PIN_TX);
 #endif
 
 // attiny45 doing a similar job, but where's the source code?
@@ -153,7 +152,7 @@ void setup()
   pinMode(PIN_RX, INPUT);
   pinMode(PIN_TX, OUTPUT);
 
-  Serial.begin(9600);
+  cout.begin(9600);
 #endif
 }
 

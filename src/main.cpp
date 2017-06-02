@@ -18,6 +18,7 @@ void ledHandler();
 void system_sleep();
 void debugBlink();
 
+using namespace FactUtilEmbedded::std;
 
 void enableOutputPins()
 {
@@ -48,6 +49,8 @@ const uint16_t wdto_ms = 500;
 // compiler for some reason doesn't optimize this line out
 //const uint8_t wdto = WatchdogControl::getWDTOfromMS<wdto_ms>();
 
+void appConsole_setup();
+
 void setup()
 {
   enableOutputPins();
@@ -73,12 +76,7 @@ void setup()
   pinMode(ANALOG_IN_CAP, INPUT);
 #endif
 
-#ifdef DEBUG_SERIAL
-  pinMode(PIN_RX, INPUT);
-  pinMode(PIN_TX, OUTPUT);
-
-  cout.begin(9600);
-#endif
+    appConsole_setup();
 }
 
 uint16_t vbat;
